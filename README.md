@@ -1,7 +1,7 @@
 # 🌍 Voyagr - Travel Discovery App
 
 <p align="center">
-  <img src="assets/images/voyagr.png" alt="Voyagr Logo" width="200"/>
+  <img src="/voyagr/assets/images/voyagr.png" alt="Voyagr Logo" width="200"/>
 </p>
 
 <p align="center">
