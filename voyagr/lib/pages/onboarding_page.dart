@@ -1,3 +1,6 @@
+//This page shows an animated image and
+// a get started button that takes users to the app
+
 import 'package:flutter/material.dart';
 
 class OnboardingPage extends StatelessWidget {
@@ -23,7 +26,7 @@ class OnboardingPage extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 18, color: Color(0xFF706969)),
                 ),
-                const SizedBox(height: 130),
+                const SizedBox(height: 60),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pushNamed(context, '/home');

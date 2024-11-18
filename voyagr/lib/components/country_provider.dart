@@ -1,9 +1,12 @@
-// country_provider.dart
+// This is the CountryProvider - it manages all the country data for the app
+// and handles communication with the API service.
+
 import 'package:flutter/foundation.dart';
 import 'api_service.dart';
 
 class CountryProvider with ChangeNotifier {
   final ApiService _apiService = ApiService();
+  // A map to store our country data, organized by category
   Map<String, List<Map<String, String>>> _countryData = {};
   bool _isLoading = false;
   String _error = '';
@@ -11,6 +14,11 @@ class CountryProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String get error => _error;
   Map<String, List<Map<String, String>>> get countryData => _countryData;
+
+  // Fetches country data for a specific category
+  // Params:
+  // - category: The continent or region (e.g., "Asia", "Europe")
+  // - countries: List of country names to fetch data for
 
   Future<void> fetchCountriesData(
       String category, List<String> countries) async {
@@ -25,6 +33,7 @@ class CountryProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     } catch (e) {
+      // Store the error and reset loading state
       _error = e.toString();
       _isLoading = false;
       notifyListeners();

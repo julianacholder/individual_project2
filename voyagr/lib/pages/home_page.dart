@@ -1,3 +1,8 @@
+// This is the main home page of Voyagr a travel app.
+// It shows different travel destinations grouped by continents and lets users
+// search for specific places and give details about
+// fun vacation plans they could do in a specific country.
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../components/country_provider.dart';
@@ -12,11 +17,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // Keep track of which category tab is selected
   String _selectedCategory = "All";
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
   final ApiService _apiService = ApiService();
 
+  //  travel destinations organized by continent
+  // TODO: Move this to a separate config file when the list grows
   final Map<String, List<String>> _categoryCountries = {
     "All": ["Maldives", "Kenya", "India", "Rwanda"],
     "Asia": ["Maldives", "India", "Bangkok"],
@@ -28,6 +36,12 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    // Fetch initial data after the widget is fully built
+    _initializeData();
+  }
+
+//used Provider for state management
+  void _initializeData() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = Provider.of<CountryProvider>(context, listen: false);
       provider.fetchCountriesData(
@@ -41,12 +55,11 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  // Handles the search functionality when user submits a country name
   Future<void> _handleSearch() async {
     final searchTerm = _searchController.text.trim();
     if (searchTerm.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a country name')),
-      );
+      _showSnackBar('Please enter a country name');
       return;
     }
 
@@ -55,12 +68,16 @@ class _HomePageState extends State<HomePage> {
     try {
       _navigateToDetails(searchTerm);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error fetching details for "$searchTerm"')),
-      );
+      _showSnackBar('Error fetching details for "$searchTerm"');
     } finally {
       setState(() => _isSearching = false);
     }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
@@ -74,270 +91,15 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Hello there! 👋',
-                  style: TextStyle(
-                    fontSize: 23,
-                    color: Color(0xFF706969),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                const Text(
-                  'Explore the world',
-                  style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                _buildHeader(),
                 const SizedBox(height: 15),
-                Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFECF2F6),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'Search for a city or country...',
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: _isSearching
-                          ? const Padding(
-                              padding: EdgeInsets.all(10),
-                              child: SizedBox(
-                                height: 20,
-                                width: 20,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2),
-                              ),
-                            )
-                          : IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () => _searchController.clear(),
-                            ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 15,
-                        vertical: 15,
-                      ),
-                    ),
-                    onSubmitted: (_) => _handleSearch(),
-                  ),
-                ),
+                _buildSearchBar(),
                 const SizedBox(height: 20),
-                const Text(
-                  'Exclusive Destinations',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 15),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: _categoryCountries.keys
-                        .map((category) => _buildTabButton(category))
-                        .toList(),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  height: 260,
-                  child: Consumer<CountryProvider>(
-                    builder: (context, provider, _) {
-                      if (provider.isLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-
-                      final countryData =
-                          provider.countryData[_selectedCategory] ?? [];
-
-                      if (countryData.isEmpty) {
-                        return const Center(
-                            child: Text('No destinations found'));
-                      }
-
-                      return ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        physics: const BouncingScrollPhysics(),
-                        itemCount: countryData.length,
-                        itemBuilder: (context, index) {
-                          final country = countryData[index];
-                          return Container(
-                            margin: const EdgeInsets.only(right: 16),
-                            width: 250,
-                            child: GestureDetector(
-                              onTap: () =>
-                                  _navigateToDetails(country['country']!),
-                              child: Card(
-                                elevation: 2,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: const BorderRadius.only(
-                                        topLeft: Radius.circular(12),
-                                        topRight: Radius.circular(12),
-                                      ),
-                                      child: Image.network(
-                                        country['image']!,
-                                        height: 190,
-                                        width: double.infinity,
-                                        fit: BoxFit.cover,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                          return Container(
-                                            height: 190,
-                                            color: Colors.grey[200],
-                                            child: const Center(
-                                              child: Icon(Icons.error),
-                                            ),
-                                          );
-                                        },
-                                        loadingBuilder:
-                                            (context, child, loadingProgress) {
-                                          if (loadingProgress == null) {
-                                            return child;
-                                          }
-                                          return SizedBox(
-                                            height: 190,
-                                            child: Center(
-                                              child: CircularProgressIndicator(
-                                                value: loadingProgress
-                                                            .expectedTotalBytes !=
-                                                        null
-                                                    ? loadingProgress
-                                                            .cumulativeBytesLoaded /
-                                                        loadingProgress
-                                                            .expectedTotalBytes!
-                                                    : null,
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(12),
-                                      child: Text(
-                                        country['country']!,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
+                _buildExclusiveDestinations(),
                 const SizedBox(height: 30),
-                const Text(
-                  'Explore Category',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CategoryCard(
-                        icon: '🏔️',
-                        label: 'Mountain',
-                      ),
-                      CategoryCard(
-                        icon: '🏖️',
-                        label: 'Beach',
-                      ),
-                      CategoryCard(
-                        icon: '🏰',
-                        label: 'History',
-                      ),
-                    ],
-                  ),
-                ),
+                _buildExploreCategories(),
                 const SizedBox(height: 30),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Know Your World',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Grow your world knowledge',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-                    SizedBox(
-                      height: 400,
-                      child: GridView.builder(
-                        physics:
-                            const NeverScrollableScrollPhysics(), // Disabled scrolling to align with the scroll at the top
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 16,
-                          crossAxisSpacing: 16,
-                          childAspectRatio: 3 / 2,
-                        ),
-                        itemCount: 4,
-                        itemBuilder: (context, index) {
-                          final places = [
-                            {
-                              "imagePath": 'assets/images/dubia.jpg',
-                              "placeName": 'Dubai',
-                              "description": 'City in the UAE',
-                            },
-                            {
-                              "imagePath": 'assets/images/bangkok.jpg',
-                              "placeName": 'Bangkok',
-                              "description": 'Capital of Thailand',
-                            },
-                            {
-                              "imagePath": 'assets/images/india.jpg',
-                              "placeName": 'Sikkim',
-                              "description": 'State of India',
-                            },
-                            {
-                              "imagePath": 'assets/images/singapore.jpg',
-                              "placeName": 'Singapore',
-                              "description": 'Country in Asia',
-                            },
-                          ];
-
-                          final place = places[index];
-
-                          return PlaceCard(
-                            imagePath: place['imagePath']!,
-                            placeName: place['placeName']!,
-                            description: place['description']!,
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
+                _buildKnowYourWorld(),
               ],
             ),
           ),
@@ -346,6 +108,187 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // The welcoming header section
+  Widget _buildHeader() {
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Hello there! 👋',
+          style: TextStyle(
+            fontSize: 23,
+            color: Color(0xFF706969),
+          ),
+        ),
+        SizedBox(height: 5),
+        Text(
+          'Explore the world',
+          style: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Search bar with loading indicator
+  Widget _buildSearchBar() {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFECF2F6),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: 'Search for a city or country...',
+          prefixIcon: const Icon(Icons.search),
+          suffixIcon: _isSearching
+              ? const _LoadingIndicator()
+              : IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () => _searchController.clear(),
+                ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 15,
+            vertical: 15,
+          ),
+        ),
+        onSubmitted: (_) => _handleSearch(),
+      ),
+    );
+  }
+
+  // Exclusive destinations section with horizontal scrolling
+  Widget _buildExclusiveDestinations() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Exclusive Destinations',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 15),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: _categoryCountries.keys
+                .map((category) => _buildTabButton(category))
+                .toList(),
+          ),
+        ),
+        const SizedBox(height: 20),
+        SizedBox(
+          height: 260,
+          child: Consumer<CountryProvider>(
+            builder: (context, provider, _) => _buildDestinationsList(provider),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // The main list of destinations
+  Widget _buildDestinationsList(CountryProvider provider) {
+    if (provider.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final countryData = provider.countryData[_selectedCategory] ?? [];
+
+    if (countryData.isEmpty) {
+      return const Center(child: Text('No destinations found'));
+    }
+
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      itemCount: countryData.length,
+      itemBuilder: (context, index) =>
+          _buildDestinationCard(countryData[index]),
+    );
+  }
+
+  // Individual destination card
+  Widget _buildDestinationCard(Map<String, String> country) {
+    return Container(
+      margin: const EdgeInsets.only(right: 16),
+      width: 250,
+      child: GestureDetector(
+        onTap: () => _navigateToDetails(country['country']!),
+        child: Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildDestinationImage(country['image']!),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Text(
+                  country['country']!,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Network image with loading and error handling
+  Widget _buildDestinationImage(String imageUrl) {
+    return ClipRRect(
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(12),
+        topRight: Radius.circular(12),
+      ),
+      child: Image.network(
+        imageUrl,
+        height: 190,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            height: 190,
+            color: Colors.grey[200],
+            child: const Center(child: Icon(Icons.error)),
+          );
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return _buildImageLoadingIndicator(loadingProgress);
+        },
+      ),
+    );
+  }
+
+  Widget _buildImageLoadingIndicator(ImageChunkEvent loadingProgress) {
+    return SizedBox(
+      height: 190,
+      child: Center(
+        child: CircularProgressIndicator(
+          value: loadingProgress.expectedTotalBytes != null
+              ? loadingProgress.cumulativeBytesLoaded /
+                  loadingProgress.expectedTotalBytes!
+              : null,
+        ),
+      ),
+    );
+  }
+
+  // Category tabs at the top
   Widget _buildTabButton(String text) {
     bool isSelected = text == _selectedCategory;
     return Container(
@@ -354,14 +297,7 @@ class _HomePageState extends State<HomePage> {
         color: isSelected ? const Color(0xFF51ADE5) : Colors.transparent,
         borderRadius: BorderRadius.circular(20),
         child: InkWell(
-          onTap: () {
-            setState(() {
-              _selectedCategory = text;
-            });
-            final provider =
-                Provider.of<CountryProvider>(context, listen: false);
-            provider.fetchCountriesData(text, _categoryCountries[text]!);
-          },
+          onTap: () => _handleCategoryChange(text),
           borderRadius: BorderRadius.circular(20),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
@@ -379,18 +315,139 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void _handleCategoryChange(String category) {
+    setState(() => _selectedCategory = category);
+    final provider = Provider.of<CountryProvider>(context, listen: false);
+    provider.fetchCountriesData(category, _categoryCountries[category]!);
+  }
+
+  // Navigation helper
   void _navigateToDetails(String countryName) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CountryDetailsPage(
-          countryName: countryName,
+        builder: (context) => CountryDetailsPage(countryName: countryName),
+      ),
+    );
+  }
+
+  // Explore categories section with icons
+  Widget _buildExploreCategories() {
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Explore Category',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
         ),
+        SizedBox(height: 20),
+        Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CategoryCard(icon: '🏔️', label: 'Mountain'),
+              CategoryCard(icon: '🏖️', label: 'Beach'),
+              CategoryCard(icon: '🏰', label: 'History'),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Know your world section with grid
+  Widget _buildKnowYourWorld() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Know Your World',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Grow your world knowledge',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.grey[600],
+          ),
+        ),
+        const SizedBox(height: 30),
+        SizedBox(
+          height: 400,
+          child: _buildPlacesGrid(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPlacesGrid() {
+    // Our featured places data
+    final places = [
+      {
+        "imagePath": 'assets/images/dubia.jpg',
+        "placeName": 'Dubai',
+        "description": 'City in the UAE',
+      },
+      {
+        "imagePath": 'assets/images/bangkok.jpg',
+        "placeName": 'Bangkok',
+        "description": 'Capital of Thailand',
+      },
+      {
+        "imagePath": 'assets/images/india.jpg',
+        "placeName": 'Sikkim',
+        "description": 'State of India',
+      },
+      {
+        "imagePath": 'assets/images/singapore.jpg',
+        "placeName": 'Singapore',
+        "description": 'Country in Asia',
+      },
+    ];
+
+    return GridView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+        childAspectRatio: 3 / 2,
+      ),
+      itemCount: places.length,
+      itemBuilder: (context, index) => PlaceCard(
+        imagePath: places[index]["imagePath"]!,
+        placeName: places[index]["placeName"]!,
+        description: places[index]["description"]!,
       ),
     );
   }
 }
 
+// Loading indicator widget to keep things DRY
+class _LoadingIndicator extends StatelessWidget {
+  const _LoadingIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.all(10),
+      child: SizedBox(
+        height: 20,
+        width: 20,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      ),
+    );
+  }
+}
+
+// A reusable card for showing travel categories
 class CategoryCard extends StatelessWidget {
   final String icon;
   final String label;
@@ -420,9 +477,7 @@ class CategoryCard extends StatelessWidget {
         children: [
           Text(
             icon,
-            style: const TextStyle(
-              fontSize: 32,
-            ),
+            style: const TextStyle(fontSize: 32),
           ),
           const SizedBox(height: 8),
           Text(
@@ -438,6 +493,8 @@ class CategoryCard extends StatelessWidget {
     );
   }
 }
+
+// Card widget for displaying place information
 
 class PlaceCard extends StatelessWidget {
   final String imagePath;
