@@ -43,7 +43,7 @@
 - **State Management**: Provider
 - **APIs**: 
   - [Pixabay API](https://pixabay.com/) for destination images
-  - [RapidAPI](https://rapidapi.com/) for country information
+  - [RapidAPI](https://rapidapi.com/bilgisamapi-bilgisamapi-default/api/travel-guide-api-city-guide-top-places) for country information
 - **Architecture**: MVVM pattern
 
 ## ⚙️ Installation
