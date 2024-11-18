@@ -8,15 +8,6 @@
   <a href="https://flutter.dev/">
     <img src="https://img.shields.io/badge/Flutter-3.0+-02569B?logo=flutter" alt="Flutter Version">
   </a>
-  <a href="https://github.com/julianacholder/voyagr/stargazers">
-    <img src="https://img.shields.io/github/stars/julianacholder/voyagr" alt="Stars">
-  </a>
-  <a href="https://github.com/julianacholder/voyagr/issues">
-    <img src="https://img.shields.io/github/issues/julianacholder/voyagr" alt="Issues">
-  </a>
-  <a href="LICENSE">
-    <img src="https://img.shields.io/github/license/julianacholder/voyagr" alt="License">
-  </a>
 </p>
 
 <p align="center">
@@ -36,11 +27,13 @@
 ## 📱 App Screenshots
 
 <p align="center">
-  <img src="/voyagr/assets/images/screenshots/loading.png" width="200" alt="Home Screen"/>
+  <img src="/voyagr/assets/images/screenshots/loading.png" width="200" alt="Loading Screen"/>
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="screenshots/search.png" width="200" alt="Search Screen"/>
+  <img src="/voyagr/assets/images/screenshots/onboarding.png" width="200" alt="Onboarding Screen"/>
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="screenshots/details.png" width="200" alt="Details Screen"/>
+  <img src="/voyagr/assets/images/screenshots/home.png" width="200" alt="Home Screen"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="/voyagr/assets/images/screenshots/details.png" width="200" alt="Details Screen"/>
 </p>
 
 
@@ -165,7 +158,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👨‍💻 Author
 
-Your Name
+Juliana Crystal Holder
 - GitHub: [@julianacholder](https://github.com/julianacholder)
 - LinkedIn: [Juliana Crystal Holder](https://linkedin.com/in/julianacrystal)
 
