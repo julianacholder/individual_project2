@@ -176,7 +176,7 @@ Give a ⭐️ if this project helped you!
 
 - [Flutter](https://flutter.dev/) for the amazing framework
 - [Pixabay](https://pixabay.com/) for the beautiful images
-- [RapidAPI](https://rapidapi.com/) for the travel data
+- [RapidAPI](https://rapidapi.com/bilgisamapi-bilgisamapi-default/api/travel-guide-api-city-guide-top-places) for the travel data
 - Icons made by [Freepik](https://www.freepik.com) from [www.flaticon.com](https://www.flaticon.com/)
 
 ---
